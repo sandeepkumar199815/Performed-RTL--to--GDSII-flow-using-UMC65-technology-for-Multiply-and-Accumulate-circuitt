@@ -1,0 +1,448 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity mac is 
+    -- perform ab + c --
+    port(a, b: in std_logic_vector(15 downto 0);
+         c: in std_logic_vector(31 downto 0);
+         s: out std_logic_vector(31 downto 0);
+         cout: out std_logic);   
+end entity;
+
+architecture behave of mac is
+    -- component declarations --
+    component andgate is
+      port (A, B: in std_ulogic;
+            prod: out std_ulogic);
+    end component andgate;
+
+    component halfadder is
+      port (A, B: in std_ulogic;
+            s, cout: out std_ulogic);
+    end component halfadder;
+
+    component fulladder is
+      port (A, B, Cin: in std_ulogic;
+            s, cout: out std_ulogic);
+    end component fulladder;
+
+    component brent_kung_adder is
+      port(a,b: in std_logic_vector(31 downto 0);
+           s: out std_logic_vector(31 downto 0);
+           cout: out std_logic;
+           cin: in std_logic);
+    end component;
+	 
+    -- layer 1 signal declarations--
+    -- we make rows corresponding to the first layer--
+    signal layer1_row1: std_logic_vector(31 downto 0);
+    signal layer1_row2: std_logic_vector(15 downto 0);
+    signal layer1_row3: std_logic_vector(16 downto 1);
+    signal layer1_row4: std_logic_vector(17 downto 2);
+    signal layer1_row5: std_logic_vector(18 downto 3);
+    signal layer1_row6: std_logic_vector(19 downto 4);
+    signal layer1_row7: std_logic_vector(20 downto 5);
+    signal layer1_row8: std_logic_vector(21 downto 6);
+    signal layer1_row9: std_logic_vector(22 downto 7);
+	 signal layer1_row10: std_logic_vector(23 downto 8);
+    signal layer1_row11: std_logic_vector(24 downto 9);
+    signal layer1_row12: std_logic_vector(25 downto 10);
+    signal layer1_row13: std_logic_vector(26 downto 11);
+    signal layer1_row14: std_logic_vector(27 downto 12);
+    signal layer1_row15: std_logic_vector(28 downto 13);
+    signal layer1_row16: std_logic_vector(29 downto 14);
+    signal layer1_row17: std_logic_vector(30 downto 15);
+	 
+	 -- signals for connections--
+    signal wires: std_logic_vector(419 downto 0);
+	 
+	 -- final sum argument signals--
+    -- first argument (top row of final layer)--
+    signal arg1: std_logic_vector(31 downto 0);
+    -- second argument (bottom row of final layer)--
+    signal arg2: std_logic_vector(31 downto 0);
+	 
+begin
+
+    -- set first row as 16 bit c--
+    layer1_row1 <= c;
+
+    -- [a1 a2 a3 ... a16] is the 8x8 array of AND gates--
+    -- accordingly set the subsequent signals for other rows-- 
+    a1: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(0), prod => layer1_row2(i)); 
+    end generate a1;
+
+    a2: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(1), prod => layer1_row3(i + 1)); 
+    end generate a2;
+
+    a3: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(2), prod => layer1_row4(i + 2)); 
+    end generate a3;
+
+    a4: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(3), prod => layer1_row5(i + 3)); 
+    end generate a4;
+    
+    a5: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(4), prod => layer1_row6(i + 4)); 
+    end generate a5;
+
+    a6: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(5), prod => layer1_row7(i + 5)); 
+    end generate a6;
+    
+    a7: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(6), prod => layer1_row8(i + 6)); 
+    end generate a7;
+    
+    a8: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(7), prod => layer1_row9(i + 7)); 
+    end generate a8;
+	 
+	 a9: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(8), prod => layer1_row10(i + 8)); 
+    end generate a9;
+
+    a10: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(9), prod => layer1_row11(i + 9)); 
+    end generate a10;
+
+    a11: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(10), prod => layer1_row12(i + 10)); 
+    end generate a11;
+
+    a12: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(11), prod => layer1_row13(i + 11)); 
+    end generate a12;
+    
+    a13: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(12), prod => layer1_row14(i + 12)); 
+    end generate a13;
+
+    a14: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(13), prod => layer1_row15(i + 13)); 
+    end generate a14;
+    
+    a15: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(14), prod => layer1_row16(i + 14)); 
+    end generate a15;
+    
+    a16: for i in 0 to 15 generate
+        and_i: andgate port map(a => b(i), b => a(15), prod => layer1_row17(i + 15)); 
+    end generate a16;
+	 
+	 --column 0--
+    arg1(0) <= layer1_row1(0);
+    arg2(0) <= layer1_row2(0);
+	 
+	 --column 1--
+    h1_1: halfadder port map(a => layer1_row1(1), b => layer1_row2(1), s => arg1(1), cout => arg2(2));
+    arg2(1) <= layer1_row3(1);
+	 
+	 --column 2--
+    h2_1: halfadder port map(a => layer1_row1(2), b => layer1_row2(2), s => wires(0), cout => wires(1));
+    f2_1: fulladder port map(a => wires(0), b => layer1_row3(2), cin=> layer1_row4(2), s => arg1(2), cout => arg2(3));
+	 
+	 --column 3--
+    h3_1: halfadder port map(a => layer1_row1(3), b => layer1_row2(3), s => wires(2), cout => wires(3));
+    f3_1: fulladder port map(a => wires(2), b => layer1_row3(3), cin => layer1_row4(3), s => wires(4), cout => wires(5));
+    f3_2: fulladder port map(a => layer1_row5(3), b => wires(1), cin => wires(4), s => arg1(3), cout => arg2(4));
+
+	 --column 4--
+    f4_1: fulladder port map(a => layer1_row1(4), b => layer1_row2(4), cin => layer1_row3(4), s => wires(6), cout => wires(7));
+    h4_1: halfadder port map(a => layer1_row4(4), b => layer1_row5(4), s => wires(8), cout => wires(9));
+    f4_2: fulladder port map(a => wires(6), b => wires(8), cin => wires(3), s => wires(10), cout =>wires(11));
+    f4_3: fulladder port map(a => wires(10), b => wires(5), cin => layer1_row6(4), s => arg1(4), cout =>arg2(5));
+	 
+	 --column 5--
+    h5_1: halfadder port map(a => layer1_row1(5), b => layer1_row2(5), s =>wires(12), cout =>wires(13));
+    f5_1: fulladder port map(a => wires(12), b => layer1_row3(5), cin => layer1_row4(5), s => wires(14), cout =>wires(15));
+    f5_2: fulladder port map(a => layer1_row5(5), b => layer1_row6(5), cin => layer1_row7(5), s => wires(16), cout =>wires(17));
+    f5_3: fulladder port map(a => wires(14), b => wires(16), cin => wires(7), s => wires(18), cout =>wires(19));
+    f5_4: fulladder port map(a => wires(18), b => wires(9) , cin => wires(11), s => arg1(5), cout => arg2(6));
+	 
+	 --column 6--
+    f6_1: fulladder port map(a => layer1_row1(6), b => layer1_row2(6), cin => layer1_row3(6), s => wires(20), cout => wires(21));
+    h6_1: halfadder port map(a => layer1_row4(6), b => layer1_row5(6), s =>wires(22), cout =>wires(23));
+    f6_2: fulladder port map(a => wires(20), b => wires(22), cin => wires(13), s => wires(24), cout => wires(25));
+    f6_3: fulladder port map(a => layer1_row6(6), b => layer1_row7(6), cin => layer1_row8(6), s => wires(26), cout => wires(27));
+    f6_4: fulladder port map(a => wires(24), b => wires(26), cin => wires(15), s => wires(28), cout => wires(29));
+    f6_5: fulladder port map(a => wires(28), b => wires(17), cin => wires(19), s => arg1(6), cout => arg2(7));
+	 
+	 --column 7--
+	 h7_1: halfadder port map(a => layer1_row1(7), b => layer1_row2(7), s => wires(30), cout => wires(31));
+    f7_1: fulladder port map(a => wires(30), b => layer1_row3(7), cin => layer1_row4(7), s => wires(32), cout => wires(33));
+    f7_2: fulladder port map(a => layer1_row5(7), b => layer1_row6(7), cin => layer1_row7(7), s => wires(34), cout => wires(35));
+    f7_3: fulladder port map(a=> wires(32), b=> wires(34), cin=> wires(21), s=> wires(36), cout=> wires(37));
+    f7_4: fulladder port map(a=> wires(23), b=> layer1_row8(7), cin=> layer1_row9(7), s=> wires(38), cout=> wires(39));
+    f7_5: fulladder port map(a=> wires(36), b=> wires(38), cin=> wires(25), s=> wires(40), cout=> wires(41));
+    f7_6: fulladder port map(a=> wires(40), b=> wires(27), cin=> wires(29), s=> arg1(7), cout=> arg2(8));
+	 
+	 --column 8--
+	 f8_1: fulladder port map(a => layer1_row1(8), b => layer1_row2(8), cin => layer1_row3(8), s => wires(42), cout => wires(43));
+	 h8_1: halfadder port map(a => layer1_row4(8), b => layer1_row5(8), s => wires(44), cout => wires(45));
+    f8_2: fulladder port map(a => wires(42), b => wires(44), cin => wires(31), s => wires(46), cout => wires(47));
+    f8_3: fulladder port map(a=> layer1_row6(8), b=> layer1_row7(8), cin=> layer1_row8(8), s=> wires(48), cout=> wires(49));
+    f8_4: fulladder port map(a=> wires(46), b=> wires(48), cin=> wires(33), s=> wires(50), cout=> wires(51));
+    f8_5: fulladder port map(a=> wires(35), b=> layer1_row9(8), cin=> layer1_row10(8), s=> wires(52), cout=> wires(53));
+    f8_6: fulladder port map(a=> wires(50), b=> wires(52), cin=> wires(37), s=> wires(54), cout=> wires(55));
+	 f8_7: fulladder port map(a=> wires(54), b=> wires(39), cin=> wires(41), s=> arg1(8), cout=> arg2(9));
+	 
+	 --column 9--
+	 f9_1: fulladder port map(a => layer1_row1(9), b => layer1_row2(9), cin => layer1_row3(9), s => wires(56), cout => wires(57));
+	 f9_2: fulladder port map(a => layer1_row4(9), b => layer1_row5(9), cin => layer1_row6(9), s => wires(58), cout => wires(59));
+	 h9_1: halfadder port map(a => layer1_row7(9), b => layer1_row8(9), s => wires(60), cout => wires(61));
+    f9_3: fulladder port map(a=> wires(56), b=> wires(58), cin=> wires(43), s=> wires(62), cout=> wires(63));
+    f9_4: fulladder port map(a=> wires(60), b=> wires(45), cin=> layer1_row9(9), s=> wires(64), cout=> wires(65));
+    f9_5: fulladder port map(a=> wires(62), b=> wires(47), cin=> wires(49), s=> wires(66), cout=> wires(67));
+    f9_6: fulladder port map(a=> wires(64), b=> layer1_row10(9), cin=> layer1_row11(9), s=> wires(68), cout=> wires(69));
+	 f9_7: fulladder port map(a=> wires(66), b=> wires(51), cin=> wires(53), s=> wires(70), cout=> wires(71));
+	 f9_8: fulladder port map(a=> wires(68), b=> wires(70), cin=> wires(55), s=> arg1(9), cout=> arg2(10));
+	 
+	 --column 10--
+	 f10_1: fulladder port map(a => layer1_row1(10), b => layer1_row2(10), cin => layer1_row3(10), s => wires(72), cout => wires(73));
+	 f10_2: fulladder port map(a => layer1_row4(10), b => layer1_row5(10), cin => layer1_row6(10), s => wires(74), cout => wires(75));
+	 f10_3: fulladder port map(a=> layer1_row7(10), b=> layer1_row8(10), cin=> layer1_row9(10), s=> wires(76), cout=> wires(77));
+	 h10_1: halfadder port map(a => layer1_row10(10), b => layer1_row11(10), s => wires(78), cout => wires(79));
+    f10_4: fulladder port map(a=> wires(72), b=> wires(74), cin=> wires(76), s=> wires(80), cout=> wires(81));
+    f10_5: fulladder port map(a=> wires(57), b=> wires(59), cin=> wires(61), s=> wires(82), cout=> wires(83));
+    f10_6: fulladder port map(a=> wires(80), b=> wires(63), cin=> wires(65), s=> wires(84), cout=> wires(85));
+	 f10_7: fulladder port map(a=> wires(82), b=> wires(78), cin=> layer1_row12(10), s=> wires(86), cout=> wires(87));
+	 f10_8: fulladder port map(a=> wires(84), b=> wires(67), cin=> wires(69), s=> wires(88), cout=> wires(89));
+	 f10_9: fulladder port map(a=> wires(86), b=> wires(88), cin=> wires(71), s=> arg1(10), cout=> arg2(11));
+	 
+	 --column 11--
+	 h11_1: halfadder port map(a => layer1_row1(11), b => layer1_row2(11), s => wires(90), cout => wires(91));
+	 f11_1: fulladder port map(a => wires(90), b => layer1_row3(11), cin => layer1_row4(11), s => wires(92), cout => wires(93));
+	 f11_2: fulladder port map(a => layer1_row5(11), b => layer1_row6(11), cin => layer1_row7(11), s => wires(94), cout => wires(95));
+	 f11_3: fulladder port map(a=> layer1_row8(11), b=> layer1_row9(11), cin=> layer1_row10(11), s=> wires(96), cout=> wires(97));
+    f11_4: fulladder port map(a=> layer1_row11(11), b=> layer1_row12(11), cin=> layer1_row13(11), s=> wires(98), cout=> wires(99));
+    f11_5: fulladder port map(a=> wires(92), b=> wires(94), cin=> wires(96), s=> wires(100), cout=> wires(101));
+    f11_6: fulladder port map(a=> wires(73), b=> wires(75), cin=> wires(77), s=> wires(102), cout=> wires(103));
+	 f11_7: fulladder port map(a=> wires(100), b=> wires(81), cin=> wires(83), s=> wires(104), cout=> wires(105));
+	 f11_8: fulladder port map(a=> wires(98), b=> wires(102), cin=> wires(79), s=> wires(106), cout=> wires(107));
+	 f11_9: fulladder port map(a=> wires(104), b=> wires(85), cin=> wires(87), s=> wires(108), cout=> wires(109));
+	 f11_10: fulladder port map(a=> wires(106), b=> wires(108), cin=> wires(89), s=> arg1(11), cout=> arg2(12));
+	 
+	 --column 12--
+	 f12_1: fulladder port map(a => layer1_row1(12), b => layer1_row2(12), cin => layer1_row3(12), s => wires(110), cout => wires(111));
+	 h12_1: halfadder port map(a => layer1_row4(12), b => layer1_row5(12), s => wires(112), cout => wires(113)); 
+	 f12_2: fulladder port map(a => wires(110), b => wires(112), cin => wires(91), s => wires(114), cout => wires(115));
+	 f12_3: fulladder port map(a=> layer1_row6(12), b=> layer1_row7(12), cin=> layer1_row8(12), s=> wires(116), cout=> wires(117));
+    f12_4: fulladder port map(a=> layer1_row9(12), b=> layer1_row10(12), cin=> layer1_row11(12), s=> wires(118), cout=> wires(119));
+    f12_5: fulladder port map(a=> layer1_row12(12), b=> layer1_row13(12), cin=> layer1_row14(12), s=> wires(120), cout=> wires(121));
+    f12_6: fulladder port map(a=> wires(114), b=> wires(116), cin=> wires(118), s=> wires(122), cout=> wires(123));
+	 f12_7: fulladder port map(a=> wires(93), b=> wires(95), cin=> wires(97), s=> wires(124), cout=> wires(125));
+	 f12_8: fulladder port map(a=> wires(122), b=> wires(101), cin=> wires(103), s=> wires(126), cout=> wires(127));
+	 f12_9: fulladder port map(a=> wires(124), b=> wires(120), cin=> wires(99), s=> wires(128), cout=> wires(129));
+	 f12_10: fulladder port map(a=> wires(126), b=> wires(105), cin=> wires(107), s=> wires(130), cout=> wires(131));
+	 f12_11: fulladder port map(a=> wires(130), b=> wires(128), cin=> wires(109), s=> arg1(12), cout=> arg2(13));
+	 
+	 --column 13--
+	 f13_1: fulladder port map(a => layer1_row1(13), b => layer1_row2(13), cin => layer1_row3(13), s => wires(132), cout => wires(133));
+	 f13_2: fulladder port map(a => layer1_row4(13), b => layer1_row5(13), cin => layer1_row6(13), s => wires(134), cout => wires(135));
+	 h13_1: halfadder port map(a => layer1_row7(13), b => layer1_row8(13), s => wires(136), cout => wires(137)); 
+	 f13_3: fulladder port map(a=> wires(132), b=> wires(111), cin=> wires(113), s=> wires(138), cout=> wires(139));
+    f13_4: fulladder port map(a=> wires(134), b=> wires(136), cin=> layer1_row9(13), s=> wires(140), cout=> wires(141));
+    f13_5: fulladder port map(a=> layer1_row10(13), b => layer1_row11(13), cin => layer1_row12(13), s=> wires(142), cout=> wires(143));
+    f13_6: fulladder port map(a=> layer1_row13(13), b => layer1_row14(13), cin => layer1_row15(13), s=> wires(144), cout=> wires(145));
+	 f13_7: fulladder port map(a=> wires(138), b=> wires(140), cin=> wires(142), s=> wires(146), cout=> wires(147));
+	 f13_8: fulladder port map(a=> wires(115), b=> wires(117), cin=> wires(119), s=> wires(148), cout=> wires(149));
+	 f13_9: fulladder port map(a=> wires(144), b=> wires(121), cin=> wires(123), s=> wires(150), cout=> wires(151));
+	 f13_10: fulladder port map(a=> wires(146), b=> wires(148), cin=> wires(125), s=> wires(152), cout=> wires(153));
+	 f13_11: fulladder port map(a=> wires(150), b=> wires(127), cin=> wires(129), s=> wires(154), cout=> wires(155));
+	 f13_12: fulladder port map(a=> wires(152), b=> wires(154), cin=> wires(131), s=> arg1(13), cout=> arg2(14));
+	 
+	 --column 14--
+	 f14_1: fulladder port map(a => layer1_row1(14), b => layer1_row2(14), cin => layer1_row3(14), s => wires(156), cout => wires(157));
+	 f14_2: fulladder port map(a => layer1_row4(14), b => layer1_row5(14), cin => layer1_row6(14), s => wires(158), cout => wires(159));
+	 f14_3: fulladder port map(a=> layer1_row7(14), b => layer1_row8(14), cin => layer1_row9(14), s=> wires(160), cout=> wires(161));
+	 h14_1: halfadder port map(a => layer1_row10(14), b => layer1_row11(14), s => wires(162), cout => wires(163)); 
+    f14_4: fulladder port map(a=> wires(156), b=> wires(158), cin=> wires(160), s=> wires(164), cout=> wires(165));
+    f14_5: fulladder port map(a=> wires(133), b=> wires(135), cin=> wires(137), s=> wires(166), cout=> wires(167));
+    f14_6: fulladder port map(a=> wires(162), b => layer1_row12(14), cin => layer1_row13(14), s=> wires(168), cout=> wires(169));
+	 f14_7: fulladder port map(a=> layer1_row14(14), b => layer1_row15(14), cin => layer1_row16(14), s=> wires(170), cout=> wires(171));
+	 f14_8: fulladder port map(a=> wires(164), b=> wires(166), cin=> wires(168), s=> wires(172), cout=> wires(173));
+	 f14_9: fulladder port map(a=> wires(139), b=> wires(141), cin=> wires(143), s=> wires(174), cout=> wires(175));
+	 f14_10: fulladder port map(a=> wires(170), b=> wires(172), cin=> wires(145), s=> wires(176), cout=> wires(177));
+	 f14_11: fulladder port map(a=> wires(174), b=> wires(147), cin=> wires(149), s=> wires(178), cout=> wires(179));
+	 f14_12: fulladder port map(a=> wires(176), b=> wires(151), cin=> wires(153), s=> wires(180), cout=> wires(181));
+	 f14_13: fulladder port map(a=> wires(178), b=> wires(180), cin=> wires(155), s=> arg1(14), cout=> arg2(15));
+	 
+	 --column 15--
+	 f15_1: fulladder port map(a => layer1_row1(15), b => layer1_row2(15), cin => layer1_row3(15), s => wires(182), cout => wires(183));
+	 f15_2: fulladder port map(a => layer1_row4(15), b => layer1_row5(15), cin => layer1_row6(15), s => wires(184), cout => wires(185));
+	 f15_3: fulladder port map(a=> layer1_row7(15), b => layer1_row8(15), cin => layer1_row9(15), s=> wires(186), cout=> wires(187));
+    f15_4: fulladder port map(a=> layer1_row10(15), b => layer1_row11(15), cin => layer1_row12(15), s=> wires(188), cout=> wires(189));
+	 h15_1: halfadder port map(a => layer1_row13(15), b => layer1_row14(15), s => wires(190), cout => wires(191)); 
+    f15_5: fulladder port map(a=> wires(182), b=> wires(184), cin=> wires(186), s=> wires(192), cout=> wires(193));
+    f15_6: fulladder port map(a=> wires(157), b => wires(159), cin => wires(161), s=> wires(194), cout=> wires(195));
+	 f15_7: fulladder port map(a=> wires(188), b=> wires(190), cin=> wires(163), s=> wires(196), cout=> wires(197));
+	 f15_8: fulladder port map(a=> layer1_row15(15), b => layer1_row16(15), cin => layer1_row17(15), s=> wires(198), cout=> wires(199));
+	 f15_9: fulladder port map(a=> wires(192), b=> wires(194), cin=> wires(196), s=> wires(200), cout=> wires(201));
+	 f15_10: fulladder port map(a=> wires(165), b=> wires(167), cin=> wires(169), s=> wires(202), cout=> wires(203));
+	 f15_11: fulladder port map(a=> wires(198), b=> wires(200), cin=> wires(171), s=> wires(204), cout=> wires(205));
+	 f15_12: fulladder port map(a=> wires(202), b=> wires(173), cin=> wires(175), s=> wires(206), cout=> wires(207));
+	 f15_13: fulladder port map(a=> wires(204), b=> wires(177), cin=> wires(179), s=> wires(208), cout=> wires(209));
+	 f15_14: fulladder port map(a=> wires(206), b=> wires(208), cin=> wires(181), s=> arg1(15), cout=> arg2(16));
+	 
+	 --column 16--
+	 f16_1: fulladder port map(a => layer1_row1(16), b => layer1_row3(16), cin => layer1_row4(16), s => wires(210), cout => wires(211));
+	 f16_2: fulladder port map(a => layer1_row5(16), b => layer1_row6(16), cin => layer1_row7(16), s => wires(212), cout => wires(213));
+	 f16_3: fulladder port map(a=> layer1_row8(16), b => layer1_row9(16), cin => layer1_row10(16), s=> wires(214), cout=> wires(215));
+    f16_4: fulladder port map(a=> layer1_row11(16), b => layer1_row12(16), cin => layer1_row13(16), s=> wires(216), cout=> wires(217));
+	 h16_1: halfadder port map(a => layer1_row14(16), b => layer1_row15(16), s => wires(218), cout => wires(219)); 
+    f16_5: fulladder port map(a=> wires(210), b=> wires(212), cin=> wires(214), s=> wires(220), cout=> wires(221));
+    f16_6: fulladder port map(a=> wires(183), b => wires(185), cin => wires(187), s=> wires(222), cout=> wires(223));
+	 f16_7: fulladder port map(a=> wires(216), b=> wires(189), cin=> wires(191), s=> wires(224), cout=> wires(225));
+	 f16_8: fulladder port map(a=> wires(218), b => layer1_row16(16), cin => layer1_row17(16), s=> wires(226), cout=> wires(227));
+	 f16_9: fulladder port map(a=> wires(220), b=> wires(222), cin=> wires(224), s=> wires(228), cout=> wires(229));
+	 f16_10: fulladder port map(a=> wires(193), b=> wires(195), cin=> wires(197), s=> wires(230), cout=> wires(231));
+	 f16_11: fulladder port map(a=> wires(226), b=> wires(199), cin=> wires(201), s=> wires(232), cout=> wires(233));
+	 f16_12: fulladder port map(a=> wires(228), b=> wires(230), cin=> wires(203), s=> wires(234), cout=> wires(235));
+	 f16_13: fulladder port map(a=> wires(232), b=> wires(234), cin=> wires(205), s=> wires(236), cout=> wires(237));
+	 f16_14: fulladder port map(a=> wires(236), b=> wires(207), cin=> wires(209), s=> arg1(16), cout=> arg2(17));
+	 
+	 --column 17--
+	 f17_1: fulladder port map(a => layer1_row1(17), b => layer1_row4(17), cin => layer1_row5(17), s => wires(238), cout => wires(239));
+	 f17_2: fulladder port map(a => layer1_row6(17), b => layer1_row7(17), cin => layer1_row8(17), s => wires(240), cout => wires(241));
+	 f17_3: fulladder port map(a=> layer1_row9(17), b => layer1_row10(17), cin => layer1_row11(17), s=> wires(242), cout=> wires(243));
+    f17_4: fulladder port map(a=> layer1_row12(17), b => layer1_row13(17), cin => layer1_row14(17), s=> wires(244), cout=> wires(245)); 
+    f17_5: fulladder port map(a=> wires(238), b=> wires(240), cin=> wires(242), s=> wires(246), cout=> wires(247));
+    f17_6: fulladder port map(a=> wires(211), b => wires(213), cin => wires(215), s=> wires(248), cout=> wires(249));
+	 f17_7: fulladder port map(a=> wires(244), b=> wires(217), cin=> wires(219), s=> wires(250), cout=> wires(251));
+	 f17_8: fulladder port map(a=> layer1_row15(17), b => layer1_row16(17), cin => layer1_row17(17), s=> wires(252), cout=> wires(253));
+	 f17_9: fulladder port map(a=> wires(246), b=> wires(248), cin=> wires(250), s=> wires(254), cout=> wires(255));
+	 f17_10: fulladder port map(a=> wires(221), b=> wires(223), cin=> wires(225), s=> wires(256), cout=> wires(257));
+	 f17_11: fulladder port map(a=> wires(252), b=> wires(227), cin=> wires(229), s=> wires(258), cout=> wires(259));
+	 f17_12: fulladder port map(a=> wires(254), b=> wires(256), cin=> wires(231), s=> wires(260), cout=> wires(261));
+	 f17_13: fulladder port map(a=> wires(258), b=> wires(260), cin=> wires(233), s=> wires(262), cout=> wires(263));
+	 f17_14: fulladder port map(a=> wires(262), b=> wires(235), cin=> wires(237), s=> arg1(17), cout=> arg2(18));
+	 
+	 --column 18--
+	 f18_1: fulladder port map(a => layer1_row1(18), b => layer1_row5(18), cin => layer1_row6(18), s => wires(264), cout => wires(265));
+	 f18_2: fulladder port map(a => layer1_row7(18), b => layer1_row8(18), cin => layer1_row9(18), s => wires(266), cout => wires(267));
+	 f18_3: fulladder port map(a=> layer1_row10(18), b => layer1_row11(18), cin => layer1_row12(18), s=> wires(268), cout=> wires(269));
+    f18_4: fulladder port map(a=> wires(264), b=> wires(266), cin=> wires(268), s=> wires(270), cout=> wires(271)); 
+    f18_5: fulladder port map(a=> wires(239), b=> wires(241), cin=> wires(243), s=> wires(272), cout=> wires(273));
+    f18_6: fulladder port map(a=> wires(245), b=> layer1_row13(18), cin=> layer1_row14(18), s=> wires(274), cout=> wires(275));
+	 f18_7: fulladder port map(a=> layer1_row15(18), b => layer1_row16(18), cin => layer1_row17(18), s=> wires(276), cout=> wires(277));
+	 f18_8: fulladder port map(a=> wires(270), b=> wires(272), cin=> wires(274), s=> wires(278), cout=> wires(279));
+	 f18_9: fulladder port map(a=> wires(247), b=> wires(249), cin=> wires(251), s=> wires(280), cout=> wires(281));
+	 f18_10: fulladder port map(a=> wires(276), b=> wires(253), cin=> wires(255), s=> wires(282), cout=> wires(283));
+	 f18_11: fulladder port map(a=> wires(278), b=> wires(280), cin=> wires(257), s=> wires(284), cout=> wires(285));
+	 f18_12: fulladder port map(a=> wires(282), b=> wires(284), cin=> wires(259), s=> wires(286), cout=> wires(287));
+	 f18_13: fulladder port map(a=> wires(286), b=> wires(261), cin=> wires(263), s=> arg1(18), cout=> arg2(19));
+	 
+	 --column 19--
+	 f19_1: fulladder port map(a => layer1_row1(19), b => layer1_row6(19), cin => layer1_row7(19), s => wires(288), cout => wires(289));
+	 f19_2: fulladder port map(a => layer1_row8(19), b => layer1_row9(19), cin => layer1_row10(19), s => wires(290), cout => wires(291));
+	 f19_3: fulladder port map(a=> wires(265), b=> wires(267), cin=> wires(269), s=> wires(292), cout=> wires(293));
+    f19_4: fulladder port map(a=> wires(288), b=> wires(290), cin=> layer1_row11(19), s=> wires(294), cout=> wires(295)); 
+    f19_5: fulladder port map(a=> layer1_row12(19), b => layer1_row13(19), cin => layer1_row14(19), s=> wires(296), cout=> wires(297));
+    f19_6: fulladder port map(a=> layer1_row15(19), b => layer1_row16(19), cin => layer1_row17(19), s=> wires(298), cout=> wires(299));
+	 f19_7: fulladder port map(a=> wires(292), b=> wires(294), cin=> wires(296), s=> wires(300), cout=> wires(301));
+	 f19_8: fulladder port map(a=> wires(271), b=> wires(273), cin=> wires(275), s=> wires(302), cout=> wires(303));
+	 f19_9: fulladder port map(a=> wires(298), b=> wires(277), cin=> wires(279), s=> wires(304), cout=> wires(305));
+	 f19_10: fulladder port map(a=> wires(300), b=> wires(302), cin=> wires(281), s=> wires(306), cout=> wires(307));
+	 f19_11: fulladder port map(a=> wires(304), b=> wires(306), cin=> wires(283), s=> wires(308), cout=> wires(309));
+	 f19_12: fulladder port map(a=> wires(308), b=> wires(285), cin=> wires(287), s=> arg1(19), cout=> arg2(20));
+	 
+	 --column 20--
+	 f20_1: fulladder port map(a => layer1_row1(20), b => layer1_row7(20), cin => layer1_row8(20), s => wires(310), cout => wires(311));
+	 f20_2: fulladder port map(a => wires(310), b=> wires(289), cin=> wires(291), s => wires(312), cout => wires(313));
+	 f20_3: fulladder port map(a=> layer1_row9(20), b => layer1_row10(20), cin => layer1_row11(20), s=> wires(314), cout=> wires(315));
+    f20_4: fulladder port map(a=> layer1_row12(20), b => layer1_row13(20), cin => layer1_row14(20), s=> wires(316), cout=> wires(317)); 
+    f20_5: fulladder port map(a=> layer1_row15(20), b => layer1_row16(20), cin => layer1_row17(20), s=> wires(318), cout=> wires(319));
+    f20_6: fulladder port map(a=> wires(312), b=> wires(314), cin=> wires(316), s=> wires(320), cout=> wires(321));
+	 f20_7: fulladder port map(a=> wires(293), b=> wires(295), cin=> wires(297), s=> wires(322), cout=> wires(323));
+	 f20_8: fulladder port map(a=> wires(318), b=> wires(299), cin=> wires(301), s=> wires(324), cout=> wires(325));
+	 f20_9: fulladder port map(a=> wires(320), b=> wires(322), cin=> wires(303), s=> wires(326), cout=> wires(327));
+	 f20_10: fulladder port map(a=> wires(324), b=> wires(305), cin=> wires(307), s=> wires(328), cout=> wires(329));
+	 f20_11: fulladder port map(a=> wires(326), b=> wires(328), cin=> wires(309), s=> arg1(20), cout=> arg2(21));
+	 
+	 --column 21--
+	 f21_1: fulladder port map(a => wires(311), b => layer1_row1(21), cin => layer1_row8(21), s => wires(330), cout => wires(331));
+	 f21_2: fulladder port map(a => layer1_row9(21), b=> layer1_row10(21), cin=> layer1_row11(21), s => wires(332), cout => wires(333));
+	 f21_3: fulladder port map(a=> layer1_row12(21), b=> layer1_row13(21), cin=> layer1_row14(21), s=> wires(334), cout=> wires(335));
+    f21_4: fulladder port map(a=> layer1_row15(21), b=> layer1_row16(21), cin=> layer1_row17(21), s=> wires(336), cout=> wires(337)); 
+    f21_5: fulladder port map(a=> wires(330), b=> wires(332), cin=> wires(334), s=> wires(338), cout=> wires(339));
+    f21_6: fulladder port map(a=> wires(313), b=> wires(315), cin=> wires(317), s=> wires(340), cout=> wires(341));
+	 f21_7: fulladder port map(a=> wires(336), b=> wires(319), cin=> wires(321), s=> wires(342), cout=> wires(343));
+	 f21_8: fulladder port map(a=> wires(338), b=> wires(340), cin=> wires(323), s=> wires(344), cout=> wires(345));
+	 f21_9: fulladder port map(a=> wires(342), b=> wires(344), cin=> wires(325), s=> wires(346), cout=> wires(347));
+	 f21_10: fulladder port map(a=> wires(346), b=> wires(327), cin=> wires(329), s=> arg1(21), cout=> arg2(22));
+	 
+	 --column 22--
+	 f22_1: fulladder port map(a => layer1_row1(22), b => layer1_row9(22), cin => layer1_row10(22), s => wires(348), cout => wires(349));
+	 f22_2: fulladder port map(a => layer1_row11(22), b => layer1_row12(22), cin => layer1_row13(22), s => wires(350), cout => wires(351));
+	 f22_3: fulladder port map(a=> layer1_row14(22), b => layer1_row15(22), cin => layer1_row16(22), s=> wires(352), cout=> wires(353));
+    f22_4: fulladder port map(a=> wires(348), b=> wires(350), cin=> wires(352), s=> wires(354), cout=> wires(355)); 
+    f22_5: fulladder port map(a=> wires(331), b=> wires(333), cin=> wires(335), s=> wires(356), cout=> wires(357));
+    f22_6: fulladder port map(a=> layer1_row17(22), b=> wires(337), cin=> wires(339), s=> wires(358), cout=> wires(359));
+	 f22_7: fulladder port map(a=> wires(354), b=> wires(356), cin=> wires(341), s=> wires(360), cout=> wires(361));
+	 f22_8: fulladder port map(a=> wires(358), b=> wires(343), cin=> wires(345), s=> wires(362), cout=> wires(363));
+	 f22_9: fulladder port map(a=> wires(360), b=> wires(362), cin=> wires(347), s=> arg1(22), cout=> arg2(23));
+	 
+	 --column 23--
+	 f23_1: fulladder port map(a => layer1_row1(23), b => layer1_row10(23), cin => layer1_row11(23), s => wires(364), cout => wires(365));
+	 f23_2: fulladder port map(a => layer1_row12(23), b => layer1_row13(23), cin => layer1_row14(23), s => wires(366), cout => wires(367));
+	 f23_3: fulladder port map(a=> wires(364), b=> wires(366), cin => layer1_row15(23), s=> wires(368), cout=> wires(369));
+    f23_4: fulladder port map(a=> wires(349), b=> wires(351), cin=> wires(353), s=> wires(370), cout=> wires(371)); 
+    f23_5: fulladder port map(a=> layer1_row16(23), b => layer1_row17(23), cin=> wires(355), s=> wires(372), cout=> wires(373));
+    f23_6: fulladder port map(a=> wires(368), b=> wires(370), cin=> wires(357), s=> wires(374), cout=> wires(375));
+	 f23_7: fulladder port map(a=> wires(372), b=> wires(359), cin=> wires(361), s=> wires(376), cout=> wires(377));
+	 f23_8: fulladder port map(a=> wires(374), b=> wires(376), cin=> wires(363), s=> arg1(23), cout=> arg2(24));
+	 
+	 --column 24--
+	 f24_1: fulladder port map(a => layer1_row1(24), b => layer1_row11(24), cin => layer1_row12(24), s => wires(378), cout => wires(379));
+	 f24_2: fulladder port map(a => wires(378), b=> wires(365), cin=> wires(367), s => wires(380), cout => wires(381));
+	 f24_3: fulladder port map(a=> layer1_row13(24), b => layer1_row14(24), cin => layer1_row15(24), s=> wires(382), cout=> wires(383));
+    f24_4: fulladder port map(a=> wires(380), b=> wires(369), cin=> wires(371), s=> wires(384), cout=> wires(385)); 
+    f24_5: fulladder port map(a=> wires(382), b => layer1_row16(24), cin => layer1_row17(24), s=> wires(386), cout=> wires(387));
+    f24_6: fulladder port map(a=> wires(384), b=> wires(373), cin=> wires(375), s=> wires(388), cout=> wires(389));
+	 f24_7: fulladder port map(a=> wires(386), b=> wires(388), cin=> wires(377), s=> arg1(24), cout=> arg2(25));
+	 
+	 --column 25--
+	 f25_1: fulladder port map(a => wires(379), b => layer1_row1(25), cin => layer1_row12(25), s => wires(390), cout => wires(391));
+	 f25_2: fulladder port map(a => layer1_row13(25), b=> layer1_row14(25), cin=> layer1_row15(25), s => wires(392), cout => wires(393));
+	 f25_3: fulladder port map(a=> wires(390), b=> wires(381), cin=> wires(383), s=> wires(394), cout=> wires(395));
+    f25_4: fulladder port map(a=> wires(392), b=> layer1_row16(25), cin => layer1_row17(25), s=> wires(396), cout=> wires(397)); 
+    f25_5: fulladder port map(a=> wires(394), b => wires(385), cin=> wires(387), s=> wires(398), cout=> wires(399));
+	 f25_6: fulladder port map(a=> wires(396), b=> wires(398), cin=> wires(389), s=> arg1(25), cout=> arg2(26));
+	 
+	 --column 26--
+	 f26_1: fulladder port map(a => layer1_row1(26), b => layer1_row13(26), cin => layer1_row14(26), s => wires(400), cout => wires(401));
+	 f26_2: fulladder port map(a => wires(400), b=> wires(391), cin=> wires(393), s => wires(402), cout => wires(403));
+	 f26_3: fulladder port map(a=> layer1_row15(26), b => layer1_row16(26), cin => layer1_row17(26), s=> wires(404), cout=> wires(405));
+    f26_4: fulladder port map(a=> wires(402), b=> wires(395), cin=> wires(397), s=> wires(406), cout=> wires(407)); 
+	 f26_5: fulladder port map(a=> wires(404), b=> wires(406), cin=> wires(399), s=> arg1(26), cout=> arg2(27));
+
+	 --column 27--
+	 f27_1: fulladder port map(a => wires(401), b => layer1_row1(27), cin => layer1_row14(27), s => wires(408), cout => wires(409));
+	 f27_2: fulladder port map(a => layer1_row15(27), b=> layer1_row16(27), cin => layer1_row17(27), s => wires(410), cout => wires(411));
+	 f27_3: fulladder port map(a=> wires(408), b=> wires(403), cin=> wires(405), s=> wires(412), cout=> wires(413));
+	 f27_4: fulladder port map(a=> wires(410), b=> wires(412), cin=> wires(407), s=> arg1(27), cout=> arg2(28));
+	 
+	 --column 28--
+	 f28_1: fulladder port map(a => layer1_row1(28), b => layer1_row15(28), cin => layer1_row16(28), s => wires(414), cout => wires(415));
+	 f28_2: fulladder port map(a => wires(414), b=> wires(409), cin=> wires(411), s => wires(416), cout => wires(417));
+	 f28_3: fulladder port map(a=> layer1_row17(28), b=> wires(416), cin=> wires(413), s=> arg1(28), cout=> arg2(29));
+
+	 --column 29--
+	 f29_1: fulladder port map(a => wires(415), b => layer1_row1(29), cin => layer1_row16(29), s => wires(418), cout => wires(419));
+	 f29_2: fulladder port map(a=> layer1_row17(29), b=> wires(418), cin=> wires(417), s=> arg1(29), cout=> arg2(30));
+	 
+	 --column 30-
+	 f30_1: fulladder port map(a=> wires(419), b=> layer1_row1(30), cin => layer1_row17(30), s=> arg1(30), cout=> arg2(31));
+	 
+	 --column 31-
+	 arg1(31) <= layer1_row1(31);
+	 
+	 --final addition using 32bit brent kung adder-
+	 final_addition : brent_kung_adder port map(a => arg1, b => arg2, cin => '0', s => s, cout => cout);
+	 
+end behave;
+
